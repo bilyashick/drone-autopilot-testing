@@ -1,0 +1,43 @@
+# .github/workflows/ci.yml
+
+name: Code Quality and Logic Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    # Визначаємо середовище виконання (віртуальна машина Linux)
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Отримання коду з репозиторію
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    # 2. Налаштування середовища Python
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 3. Встановлення залежностей (Pylint та PyTest)
+    - name: Install dependencies
+      run: |
+        pip install pylint pytest
+
+    # 4. СТАТИЧНИЙ АНАЛІЗ (Перевірка якості коду)
+    # Pylint перевіряє всі модулі
+    - name: Run Static Analysis (Pylint)
+      run: |
+        python -m pylint constants.py sensors.py flight_logic.py test_logic.py
+      # Опціонально: pylint --fail-under=7.0 ... (для встановлення порогу якості)
+
+    # 5. ДИНАМІЧНЕ ТЕСТУВАННЯ (Перевірка логіки дрона)
+    # PyTest запускає юніт-тести, які перевіряють логіку Avoidance та Stability
+    - name: Run Unit Tests (PyTest)
+      run: |
+        python -m pytest test_logic.py
