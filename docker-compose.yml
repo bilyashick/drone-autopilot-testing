@@ -1,25 +1,21 @@
-version: '3.8'
+version: '3'
 
 services:
-  # 1. СЕРВІС ПРОГРАМНОЇ ЛОГІКИ ДРОНА (ПЗ)
-  flight_logic:
+  drone_core:
     build: .
-    volumes:
-      # Монтуємо код для тестування
-      - .:/app 
+    container_name: drone_core
+    command: pytest -v
     networks:
       - drone_network
-    # Команда за замовчуванням: запуск тестів
-    command: pytest test_logic.py 
 
-  # 2. СЕРВІС-СИМУЛЯТОР АПАРАТНОГО ЗАБЕЗПЕЧЕННЯ (АЗ)
-  az_simulator:
-    image: alpine/socat 
-    # socat імітує мережевий зв'язок між ПЗ та АЗ
-    command: socat TCP-LISTEN:8080,fork TCP:host.docker.internal:5000
+  controller_emulator:
+    image: python:3.11-slim
+    container_name: controller_emulator
+    command: >
+      sh -c "echo 'Controller emulator running (імітація звʼязку з контролером)' && sleep infinity"
     networks:
       - drone_network
-    
+
 networks:
   drone_network:
     driver: bridge
