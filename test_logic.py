@@ -8,7 +8,7 @@ from constants import STAB_CENTER
 # --- 1. ТЕСТУВАННЯ ЛОГІКИ УНИКНЕННЯ (AvoidanceLogic) ---
 
 def test_distance_conversion():
-    
+    # емуляція значення тривалості ехо-сигналу
     assert calculate_distance(588) == 9
 
 def test_critical_danger_zone():
@@ -29,7 +29,7 @@ def test_safe_zone():
 def test_stable_flight():
     # 512 - ідеальний центр
     assert check_stability_status(STAB_CENTER) == "STABLE"
-    # 600 - у межах толерантності 100 (612)
+    # 600 - у межах толерантності 100 (512 +/- 100)
     assert check_stability_status(600) == "STABLE"
 
 def test_roll_error_high():
