@@ -1,0 +1,48 @@
+# .github/workflows/ci-cd.yml
+
+name: Drone CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      # --- ЕТАП ЗБІРКИ (Build Stage) ---
+      - name: 2. Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Збірка образу на основі Dockerfile (який встановлює Pylint/PyTest)
+      - name: 3. Build Flight Logic Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false 
+          tags: flight-logic:latest
+          load: true # Завантажуємо образ локально для тестування
+
+      # --- ЕТАП ТЕСТУВАННЯ (Test Stage) ---
+      # 4. Run Static Analysis (Pylint) - Виконується всередині створеного образу
+      - name: 4. Run Static Analysis (Pylint)
+        run: |
+          docker run --rm flight-logic:latest pylint constants.py sensors.py flight_logic.py test_logic.py
+          
+      # 5. Run Unit Tests (PyTest) - Запуск автоматизованих скриптів
+      - name: 5. Run Unit/Integration Tests (PyTest)
+        run: |
+          docker run --rm flight-logic:latest pytest test_logic.py
+      
+      # --- ЕТАП РОЗГОРТАННЯ (Deploy Stage - Імітація) ---
+      - name: 6. Deploy Success Confirmation
+        # Це симуляція успішного завершення та готовності до завантаження на контролер
+        run: |
+          echo "Програмне забезпечення дрона успішно пройшло перевірку CI/CD."
+          echo "Готово до розгортання."
